@@ -17,8 +17,12 @@ def get_digest(file_path):
 
     return h.hexdigest()
 
-flashed = os.listdir("./flashed")
+try:
+    subprocess.check_output(['pkill', 'screen'])
+except subprocess.CalledProcessError:
+    pass
 
+flashed = os.listdir("./flashed")
 toFlash = os.listdir("./src")
 for file in toFlash:
     if file in flashed and (get_digest("./flashed/" + file) == get_digest("./src/" + file)):
@@ -27,7 +31,7 @@ for file in toFlash:
     try:
         print("Updating " + file)
         subprocess.check_output(['ampy', '-p', '/dev/ttyS3', 'put', './src/' + file])
-        subprocess.check_output(['cp', './src/' + file, './flashed/' + file])
+        subprocess.check_output(['cp', '-r', './src/' + file, './flashed/' + file])
         print("Updated " + file)
     except:
         print("Error updating " + file)

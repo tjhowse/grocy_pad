@@ -1,17 +1,27 @@
+
 from m5stack_ui import *
+import time
+from i2c_kb import i2c_kb
+
+
 screen = M5Screen()
 screen.clean_screen()
-Textarea = M5Textarea()
+textarea = M5Textarea()
 
-# Textarea.set_text("Hello World")
+keyboard = i2c_kb()
 
-import i2c_bus
+# read once
+print("Key value:", end='')
+print(keyboard.read())
 
-# i2c0 = i2c_bus.easyI2C(i2c_bus.PORTA, addr, freq=400000)
-sda = 21
-scl = 22
-i2c0 = i2c_bus.easyI2C((sda, scl), 0x68, freq=400000)
+# callback
+def keyboard_cb(value):
+  print("Key value:", end='')
+  print(value)
 
-# True or False
-if i2c0.available():
-    Textarea.set_text(i2c0.scan())
+keyboard.callback(keyboard_cb)
+# while True:
+#     time.sleep(0.1)
+#     a = keyboard.read()
+#     if a != b'\x00':
+#         print(a)
