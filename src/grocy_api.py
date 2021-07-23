@@ -1,14 +1,13 @@
-#!/usr/local/bin/python3
+#!/usr/bin/python3
 
-import requests
+import urequests as requests
 import json
-import logging
-from datetime import datetime
+# from datetime import datetime
 import os
 
-class grocy_api():
+class grocy_api:
     def __init__(self, api_key, domain):
-        self.base_url = f'https://{domain}/api/'
+        self.base_url = '{}/api/'.format(domain)
         self.headers = {
                         'content-type': 'application/json',
                         'GROCY-API-KEY': api_key
@@ -22,28 +21,28 @@ class grocy_api():
                             ]
         self.db_changed_time = None
 
-    def get_db_changed_time(self):
-        ### Returns the time of the last change in the database
-        url = f'{self.base_url}system/db-changed-time'
-        response = requests.get(url, headers=self.headers)
-        if response.status_code != 200:
-            logging.error(response.text)
-        time = json.loads(response.text)
-        return datetime.strptime(time['changed_time'], "%Y-%m-%d %H:%M:%S")
+    # def get_db_changed_time(self):
+    #     ### Returns the time of the last change in the database
+    #     url = '{}system/db-changed-time'.format(self.base_url)
+    #     response = requests.get(url, headers=self.headers)
+    #     if response.status_code != 200:
+    #         print(response.text)
+    #     time = json.loads(response.text)
+    #     return datetime.strptime(time['changed_time'], "%Y-%m-%d %H:%M:%S")
 
     def sync(self):
         ### Syncs the database with the server
-        db_changed_time = self.get_db_changed_time()
-        if self.db_changed_time is None or self.db_changed_time < db_changed_time:
-            self.db_changed_time = db_changed_time
-            for entity in self.entity_names:
-                self.sync_entity(entity)
+        # db_changed_time = self.get_db_changed_time()
+        # if self.db_changed_time is None or self.db_changed_time < db_changed_time:
+        #     self.db_changed_time = db_changed_time
+        for entity in self.entity_names:
+            self.sync_entity(entity)
 
     def sync_entity(self, entity_name):
-        url = f'{self.base_url}objects/{entity_name}'
+        url = '{}objects/{}'.format(self.base_url, entity_name)
         response = requests.get(url, headers=self.headers)
         if response.status_code != 200:
-            logging.error(response.text)
+            print(response.text)
         raw = json.loads(response.text)
         self.tables[entity_name] = {}
         for entity in raw:
@@ -56,7 +55,7 @@ class grocy_api():
             amount = product['amount']
             unit = g.tables['quantity_units'][product['qu_id']]['name']
             name = g.tables['products'][product['product_id']]['name']
-            print(f'{amount} {unit} {name}')
+            print('{} {} {}'.format(amount, unit, name))
 
     def get_recipe_list(self):
         ### Returns a list of recipies
@@ -69,11 +68,11 @@ class grocy_api():
 
     def add_recipe_to_shopping_list(self, recipe_id):
         ### Adds a recipe to the shopping list
-        url = f'{self.base_url}recipes/{recipe_id}/add-not-fulfilled-products-to-shoppinglist'
+        url = '{}recipes/{}/add-not-fulfilled-products-to-shoppinglist'.format(self.base_url, recipe_id)
         response = requests.post(url, headers=self.headers)
         print(response)
         if response.status_code != 204:
-            logging.error(response.text)
+            print(response.text)
         return response.text
 
     def search_products_by_name(self, name):
@@ -86,7 +85,7 @@ class grocy_api():
 
 if __name__ == '__main__':
     key = os.getenv('GROCY_API_KEY')
-    domain = os.getenv('GROCY_DOMAIN')
+    domain = "https://{}".format(os.getenv('GROCY_DOMAIN'))
     g = grocy_api(key, domain)
     g.sync()
     for product in g.search_products_by_name('sugar'):
