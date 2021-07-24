@@ -48,3 +48,9 @@ I wrote this to avoid flashing stuff to the ESP unless it changed.
 
 The qwerty face module fires pin 5 interrupt when a button is pressed, but the core2 module
 has pin 5 on the header connected to pin 33, so the example projects don't work.
+
+# i2c weirdness
+
+Using `from machine import i2c` and setting up an i2c bus on a couple of pins doesn't seem to work
+reliably. There's some persistent state lingering that means that approach only works if the hardware
+was already set up using `import i2c_bus\ni2c_bus.easyI2C()`, for some reason.

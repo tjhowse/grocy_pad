@@ -3,7 +3,7 @@ from m5stack_ui import *
 import time
 from i2c_kb import i2c_kb
 from secrets import grocy_api_key, grocy_domain
-from grocy_api import grocy_api
+# from grocy_api import grocy_api
 
 screen = M5Screen()
 screen.clean_screen()
