@@ -23,20 +23,23 @@ class grocy_api:
                             ]
         self.db_changed_time = None
 
-    # def get_db_changed_time(self):
-    #     ### Returns the time of the last change in the database
-    #     url = '{}system/db-changed-time'.format(self.base_url)
-    #     response = requests.get(url, headers=self.headers)
-    #     if response.status_code != 200:
-    #         print(response.text)
-    #     time = json.loads(response.text)
-    #     return datetime.strptime(time['changed_time'], "%Y-%m-%d %H:%M:%S")
+    def get_db_changed_time(self):
+        ### Returns the time of the last change in the database
+        url = '{}system/db-changed-time'.format(self.base_url)
+        response = requests.get(url, headers=self.headers)
+        if response.status_code != 200:
+            print(response.text)
+        time = json.loads(response.text)
+        return time['changed_time']
 
     def sync(self):
         ### Syncs the database with the server
-        # db_changed_time = self.get_db_changed_time()
-        # if self.db_changed_time is None or self.db_changed_time < db_changed_time:
-        #     self.db_changed_time = db_changed_time
+        db_changed_time = self.get_db_changed_time()
+        if self.db_changed_time is None or self.db_changed_time != db_changed_time:
+            self.db_changed_time = db_changed_time
+        else:
+            # Nothing's change since last
+            return
         for entity in self.entity_names:
             self.sync_entity(entity)
 
@@ -80,7 +83,8 @@ class grocy_api:
     def search_products_by_name(self, name):
         ### Returns a list of products that match the name
         result = []
-        for id, product in self.tables['products'].items():
+        for id in self.tables['products']:
+            product = self.tables['products'][id]
             if name.lower() in product['name'].lower():
                 result.append(product)
         return result

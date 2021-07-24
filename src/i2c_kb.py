@@ -4,13 +4,16 @@ class i2c_kb:
     if pin == self.interrupt_pin:
       if self.cursor < self.buffer_size-1:
         self.new = True
-        char = self.i2c.read_u8(1)
-        if char == 8 and self.cursor > 0:
-          # Backspace.
-          self.cursor -= 1
-        else:
-          self.buffer[self.cursor] = char
-          self.cursor += 1
+        while True:
+          char = self.i2c.read_u8(1)
+          if char == 0:
+            break
+          if char == 8 and self.cursor > 0:
+            # Backspace.
+            self.cursor -= 1
+          else:
+            self.buffer[self.cursor] = char
+            self.cursor += 1
 
   def __init__(self, i2c=None, sda=21, scl=22, interrupt=33):
     from machine import Pin
