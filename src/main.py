@@ -11,11 +11,11 @@ screen = M5Screen()
 screen.clean_screen()
 textarea = M5Textarea()
 
-# print("API Initialising")
-# g = grocy_api(grocy_api_key, grocy_domain)
-# print("Starting sync")
-# g.sync()
-# print("Sync done")
+print("API Initialising")
+g = grocy_api(grocy_api_key, grocy_domain)
+print("Starting sync")
+g.sync()
+print("Sync done")
 keyboard = i2c_kb()
 
 search_results = ""
