@@ -54,3 +54,6 @@ has pin 5 on the header connected to pin 33, so the example projects don't work.
 Using `from machine import i2c` and setting up an i2c bus on a couple of pins doesn't seem to work
 reliably. There's some persistent state lingering that means that approach only works if the hardware
 was already set up using `import i2c_bus\ni2c_bus.easyI2C()`, for some reason.
+
+Sometimes it just stops responding. I thought it might be a bug in the callback and the exception
+disappears. But no?

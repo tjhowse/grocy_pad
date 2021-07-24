@@ -35,3 +35,4 @@ for file in toFlash:
         print("Updated " + file)
     except:
         print("Error updating " + file)
+# subprocess.check_output(['ampy', '-p', '/dev/ttyS3', 'reset'])

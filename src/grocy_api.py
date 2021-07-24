@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-
-import urequests as requests
+try:
+    import urequests as requests
+except ImportError:
+    import requests
 import json
 # from datetime import datetime
 import os
@@ -14,10 +16,10 @@ class grocy_api:
                         }
         self.tables = {}
         self.entity_names = [   'products',
-                                'recipes',
-                                'quantity_units',
-                                'shopping_list',
-                                'shopping_lists',
+                                # 'recipes',
+                                # 'quantity_units',
+                                # 'shopping_list',
+                                # 'shopping_lists',
                             ]
         self.db_changed_time = None
 
