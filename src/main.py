@@ -26,15 +26,15 @@ while True:
     if keyboard.new:
         buffer = keyboard.get_buffer_as_string()
         print("Got keyboard buffer: {}".format(buffer))
-        textarea.set_text(buffer)
-        # search_results = ""
-        # print("Looking for products")
-        # for product in g.search_products_by_name(buffer):
-        #     search_results += product['name'] + "\n"
-        # print("Writing results to textarea: {}".format(search_results))
+        # textarea.set_text(buffer)
+        search_results = ""
+        print("Looking for products")
+        for product in g.search_products_by_name(buffer):
+            search_results += product['name'] + "\n"
+        print("Writing results to textarea: {}".format(search_results))
         # screen.clean_screen()
         # textarea = M5Textarea()
-        # textarea.set_text(search_results)
+        textarea.set_text(search_results)
     # time.sleep(0.1)
 
 
