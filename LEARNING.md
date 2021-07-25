@@ -57,3 +57,9 @@ was already set up using `import i2c_bus\ni2c_bus.easyI2C()`, for some reason.
 
 Sometimes it just stops responding. I thought it might be a bug in the callback and the exception
 disappears. But no?
+
+# Precompiled modules
+
+I think it might be best to handle the keyboard in a C module: https://docs.micropython.org/en/latest/develop/natmod.html#natmod
+I'm having troubles getting the ISR for a keypress small enough to be useful.
+Maybe based on: https://github.com/m5stack/M5Stack/blob/master/examples/Face/KEYBOARD/KEYBOARD.ino

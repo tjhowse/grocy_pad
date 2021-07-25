@@ -14,25 +14,27 @@ textarea = M5Textarea()
 print("API Initialising")
 g = grocy_api(grocy_api_key, grocy_domain)
 print("Starting sync")
-g.sync()
+# g.sync()
 print("Sync done")
-keyboard = i2c_kb()
+keyboard = i2c_kb(interrupt=None)
 
 search_results = ""
 
 print("Looping")
 while True:
+    keyboard.poll()
     if keyboard.new:
         buffer = keyboard.get_buffer_as_string()
         print("Got keyboard buffer: {}".format(buffer))
-        search_results = ""
-        print("Looking for products")
-        for product in g.search_products_by_name(buffer):
-            search_results += product['name'] + "\n"
-        print("Writing results to textarea: {}".format(search_results))
-        screen.clean_screen()
-        textarea = M5Textarea()
-        textarea.set_text(search_results)
+        textarea.set_text(buffer)
+        # search_results = ""
+        # print("Looking for products")
+        # for product in g.search_products_by_name(buffer):
+        #     search_results += product['name'] + "\n"
+        # print("Writing results to textarea: {}".format(search_results))
+        # screen.clean_screen()
+        # textarea = M5Textarea()
+        # textarea.set_text(search_results)
     # time.sleep(0.1)
 
 
