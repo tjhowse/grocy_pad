@@ -8,7 +8,10 @@ from grocy_api import grocy_api
 def manage_input_box(kb, textbox):
     kb.poll()
     if kb.new:
-        textbox.setText(kb.get_buffer_as_string())
+        textbox.set_text(kb.get_buffer_as_string())
+        return True
+    return False
+
 
 # return
 screen = M5Screen()
@@ -29,31 +32,20 @@ rows = 0
 print("Looping")
 keyboard.new = True
 while True:
-    keyboard.poll()
-    if keyboard.new:
-        buffer = keyboard.get_buffer_as_string()
-        buffer_text.set_text(buffer)
-        while rows > 0:
-            product_list.remove_label_index(0)
-            rows -= 1
-        # product_list = M5List(x=0, y=0)
-        # product_list.set_size(260,240-32)
-        for product in g.search_products_by_name(buffer):
-            product_list.add_label(product['name'])
-            rows += 1
-            # pass
-
-    # time.sleep(0.1)
-
-
-
-# def keyboard_cb(value):
-#   print("Key value:", end='')
-#   print(value)
-
-# print("Looping")
-# while True:
-#   time.sleep(0.1)
-#   textarea.set_text(keyboard.get_buffer_as_string())
-
-# keyboard.callback(keyboard_cb)
+    flag = False
+    if not manage_input_box(keyboard, buffer_text):
+        continue
+    products = g.search_products_by_name(buffer_text.obj.get_text())
+    while rows > 0:
+        if manage_input_box(keyboard, buffer_text):
+            flag = True
+            break
+        product_list.remove_label_index(0)
+        rows -= 1
+    if flag:
+        continue
+    for p in products:
+        if manage_input_box(keyboard, buffer_text):
+            break
+        product_list.add_label(p['name'])
+        rows += 1
