@@ -31,11 +31,13 @@ rows = 0
 
 print("Looping")
 keyboard.new = True
+products = []
 while True:
     flag = False
-    if not manage_input_box(keyboard, buffer_text):
+    if manage_input_box(keyboard, buffer_text):
+        products = g.search_products_by_name(buffer_text.obj.get_text())
+    if rows == len(products):
         continue
-    products = g.search_products_by_name(buffer_text.obj.get_text())
     while rows > 0:
         if manage_input_box(keyboard, buffer_text):
             flag = True
