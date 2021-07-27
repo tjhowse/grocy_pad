@@ -1,6 +1,7 @@
 
 class i2c_kb:
   def _callback(self, pin):
+    # Note: Don't assume this has been kept up-to-date with the poll method below.
     # import machine
     # state = machine.disable_irq()
     if pin == self.interrupt_pin:
@@ -10,12 +11,14 @@ class i2c_kb:
           self.char = self.i2c.read_u8(1)
           if self.char == 0:
             break
-          if self.char == 8 and self.cursor > 0:
+          if self.char == 8:
             # Backspace.
             self.cursor -= 1
           else:
             self.buffer[self.cursor] = self.char
             self.cursor += 1
+    # Bounds check cursor
+    self.cursor = min(max(self.cursor, 0), self.buffer_size-1)
     # machine.enable_irq(state)
 
   def __init__(self, i2c=None, sda=21, scl=22, interrupt=33):
@@ -53,13 +56,15 @@ class i2c_kb:
       if self.char == 0:
         break
       self.new = True
-      if self.char == 8 and self.cursor > 0:
+      if self.char == 8:
         # Backspace.
         self.cursor -= 1
       else:
         self.buffer[self.cursor] = self.char
         self.cursor += 1
       self.new = True
+      # Bounds check cursor
+      self.cursor = min(max(self.cursor, 0), self.buffer_size-1)
 
   def read_i2c_raw(self, size):
     return self.i2c.read_u8(size)

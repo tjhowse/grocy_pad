@@ -80,14 +80,13 @@ class grocy_api:
             print(response.text)
         return response.text
 
-    def search_products_by_name(self, name):
-        ### Returns a list of products that match the name
+    def search_product_names_by_name(self, name):
+        ### Generates a list of product names.
         result = []
         for id in self.tables['products']:
             product = self.tables['products'][id]
             if name.lower() in product['name'].lower():
-                result.append(product)
-        return result
+                yield product['name']
 
 if __name__ == '__main__':
     key = os.getenv('GROCY_API_KEY')
