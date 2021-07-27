@@ -13,6 +13,9 @@ def manage_input_box(kb, textbox):
         return True
     return False
 
+def btn_add_cb(a, b):
+    print("A: {} B: {}".format(a, b))
+
 screen = M5Screen()
 screen.clean_screen()
 textarea = M5Textarea(text="Syncing with Grocy...", x=0, y=0, w=320,h=32)
@@ -21,12 +24,17 @@ g.sync()
 textarea.set_text("Sync done.")
 keyboard = i2c_kb(interrupt=None)
 
+screen_width = 320
+screen_height = 240
+btn_width = 80
+txt_height = 32
 search_results = ""
 screen.clean_screen()
-buffer_text = M5Textarea( x=0, y=240-32, w=320, h=32)
+buffer_text = M5Textarea( x=0, y=screen_height-txt_height, w=screen_width, h=txt_height)
 product_list = M5List(x=0, y=0)
-product_list.set_size(260,240-32)
-rows = 0
+product_list.set_size(screen_width-btn_width,screen_height-txt_height)
+btn_add = M5Btn(text="Add", x=screen_width-btn_width, y=0, w=btn_width, h=btn_width)
+btn_add.set_cb(btn_add_cb)
 
 print("Looping")
 keyboard.new = True
