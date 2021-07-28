@@ -50,20 +50,24 @@ keyboard = i2c_kb(interrupt=None)
 screen_width = 320
 screen_height = 240
 btn_width = 80
+btn_corner_radius = 20
 txt_height = 32
 search_results = ""
 scr.clean()
 buffer_text = lv.textarea(scr)
-buffer_text.align(None, lv.ALIGN.IN_BOTTOM_MID, 0, 0)
-# buffer_text.set_x(0)
-# buffer_text.set_y(screen_height-txt_height)
-# buffer_text.set_width(screen_width)
-# buffer_text.set_height(txt_height)
+buffer_text.set_width(screen_width)
+buffer_text.set_height(txt_height)
+buffer_text.align(None, lv.ALIGN.IN_BOTTOM_LEFT, 0, 0)
 product_list = lv.list(scr)
-product_list.align(None, lv.ALIGN.IN_TOP_MID, 0, 0)
-# product_list.set_size(screen_width-btn_width,screen_height-txt_height)
-# btn_add = M5Btn(text="Add", x=screen_width-btn_width, y=0, w=btn_width, h=btn_width)
-# btn_add.set_cb(btn_add_cb)
+product_list.set_size(screen_width-btn_width, screen_height-txt_height)
+product_list.align(None, lv.ALIGN.IN_TOP_LEFT, 0, 0)
+btn_add = lv.btn(scr)
+btn_add.set_width(btn_width)
+btn_add.set_height(btn_width)
+btn_add.set_style_local_radius(lv.btn.PART.MAIN,lv.STATE.DEFAULT,btn_corner_radius)
+btn_add.align(None, lv.ALIGN.IN_TOP_RIGHT, 0,0)
+btn_add_label = lv.label(btn_add)
+btn_add_label.set_text("Add")
 
 print("Looping")
 keyboard.new = True
@@ -79,16 +83,16 @@ while True:
             t = time.ticks_ms()
 
     # Things have been set in motion...
-    products = list(g.search_product_names_by_name(buffer_text.obj.get_text()))
+    products = list(g.search_product_names_by_name(buffer_text.get_text()))
     to_remove_from_displayed = []
     for disp in displayed:
         if disp not in products:
-            i = product_list.get_label_index(displayed[disp])
-            product_list.remove_label_index(i)
+            i = product_list.get_btn_index(displayed[disp])
+            product_list.remove(i)
             to_remove_from_displayed.append(disp)
         else:
             products.remove(disp)
     for product in products:
-        displayed[product] = product_list.add_label(product)
+        displayed[product] = product_list.add_btn(None, product)
     for disp in to_remove_from_displayed:
         del displayed[disp]
