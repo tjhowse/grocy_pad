@@ -18,7 +18,7 @@ class grocy_api:
         self.entity_names = [   'products',
                                 # 'recipes',
                                 # 'quantity_units',
-                                # 'shopping_list',
+                                'shopping_list',
                                 # 'shopping_lists',
                             ]
         self.db_changed_time = None
@@ -54,13 +54,13 @@ class grocy_api:
             self.tables[entity_name][entity['id']] = entity
 
     def get_shopping_list(self):
-        ### Returns a string of the current shopping list
-        result = []
-        for id, product in self.tables['shopping_list'].items():
-            amount = product['amount']
-            unit = g.tables['quantity_units'][product['qu_id']]['name']
-            name = g.tables['products'][product['product_id']]['name']
-            print('{} {} {}'.format(amount, unit, name))
+        for id in self.tables['shopping_list']:
+            product = self.tables['shopping_list'][id]
+            # amount = product['amount']
+            # unit = self.tables['quantity_units'][product['qu_id']]['name']
+            name = self.tables['products'][product['product_id']]['name']
+            # yield (name, amount, unit)
+            yield name
 
     def get_recipe_list(self):
         ### Returns a list of recipies

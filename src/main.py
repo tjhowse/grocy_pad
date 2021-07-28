@@ -6,6 +6,12 @@ from grocy_api import grocy_api
 import time
 import lvgl as lv
 
+SCREEN_WIDTH = 320
+SCREEN_HEIGHT = 240
+btn_width = 80
+btn_corner_radius = 20
+txt_height = 32
+
 def manage_input_box(kb, textbox):
     kb.poll()
     if kb.new:
@@ -41,25 +47,22 @@ spinner = show_spinner()
 g = grocy_api(grocy_api_key, grocy_domain)
 g.sync()
 
+shopping_list = list(g.get_shopping_list())
+
 spinner.delete()
 msg.delete()
 show_msg("Sync done")
 
 keyboard = i2c_kb(interrupt=None)
 
-screen_width = 320
-screen_height = 240
-btn_width = 80
-btn_corner_radius = 20
-txt_height = 32
 search_results = ""
 scr.clean()
 buffer_text = lv.textarea(scr)
-buffer_text.set_width(screen_width)
+buffer_text.set_width(SCREEN_WIDTH)
 buffer_text.set_height(txt_height)
 buffer_text.align(None, lv.ALIGN.IN_BOTTOM_LEFT, 0, 0)
 product_list = lv.list(scr)
-product_list.set_size(screen_width-btn_width, screen_height-txt_height)
+product_list.set_size(SCREEN_WIDTH-btn_width, SCREEN_HEIGHT-txt_height)
 product_list.align(None, lv.ALIGN.IN_TOP_LEFT, 0, 0)
 btn_add = lv.btn(scr)
 btn_add.set_width(btn_width)
@@ -68,6 +71,9 @@ btn_add.set_style_local_radius(lv.btn.PART.MAIN,lv.STATE.DEFAULT,btn_corner_radi
 btn_add.align(None, lv.ALIGN.IN_TOP_RIGHT, 0,0)
 btn_add_label = lv.label(btn_add)
 btn_add_label.set_text("Add")
+
+
+on_shopping_list_colour = lv.color_make(255,255,255)
 
 print("Looping")
 keyboard.new = True
@@ -94,5 +100,7 @@ while True:
             products.remove(disp)
     for product in products:
         displayed[product] = product_list.add_btn(None, product)
+        if product in shopping_list:
+            displayed[product].set_style_local_bg_color(0, 0, lv.color_make(128,255,128))
     for disp in to_remove_from_displayed:
         del displayed[disp]

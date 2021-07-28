@@ -29,6 +29,8 @@ for file in toFlash:
         print("File " + file + " already flashed")
         continue
     try:
+        if not file.endswith(".py"):
+            continue
         print("Updating " + file)
         subprocess.check_output(['ampy', '-p', '/dev/ttyS3', 'put', './src/' + file])
         subprocess.check_output(['cp', '-r', './src/' + file, './flashed/' + file])
