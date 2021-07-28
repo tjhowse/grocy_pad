@@ -19,11 +19,20 @@ def manage_input_box(kb, textbox):
         return True
     return False
 
-def btn_add_cb(a, b):
-    # print("A: {} B: {}".format(a, b))
-    if b == 0:
-        # Touch down
-        pass
+def btn_add_cb(obj, event):
+    if event == lv.EVENT.CLICKED:
+        # TODO check the label. It should change to "Remove" or something
+        # if we've selected a product in the shopping list.
+        global selected_product
+        global shopping_list
+        shopping_list.add(selected_product)
+
+def product_list_cb(obj, event):
+    list_btn = lv.list.__cast__(obj)
+    if event == lv.EVENT.CLICKED:
+        # TODO Change the label on the add thing if it's already in the shopping list.
+        global selected_product
+        selected_product = list_btn.get_btn_text()
 
 def show_msg(msg, x = 0, y = 0):
     box = lv.msgbox(lv.scr_act())
@@ -37,6 +46,7 @@ def show_spinner():
     preload.align(None, lv.ALIGN.CENTER, 0, 0)
     return preload
 
+
 screen = M5Screen()
 
 scr = lv.scr_act()
@@ -47,7 +57,7 @@ spinner = show_spinner()
 g = grocy_api(grocy_api_key, grocy_domain)
 g.sync()
 
-shopping_list = list(g.get_shopping_list())
+shopping_list = set(g.get_shopping_list())
 
 spinner.delete()
 msg.delete()
@@ -69,11 +79,13 @@ btn_add.set_width(btn_width)
 btn_add.set_height(btn_width)
 btn_add.set_style_local_radius(lv.btn.PART.MAIN,lv.STATE.DEFAULT,btn_corner_radius)
 btn_add.align(None, lv.ALIGN.IN_TOP_RIGHT, 0,0)
+btn_add.set_event_cb(btn_add_cb)
 btn_add_label = lv.label(btn_add)
 btn_add_label.set_text("Add")
 
 
 on_shopping_list_colour = lv.color_make(255,255,255)
+selected_product = ""
 
 print("Looping")
 keyboard.new = True
@@ -87,7 +99,7 @@ while True:
             # If a button is pressed, restart the timer.
             flag = True
             t = time.ticks_ms()
-
+    print(selected_product)
     # Things have been set in motion...
     products = list(g.search_product_names_by_name(buffer_text.get_text()))
     to_remove_from_displayed = []
@@ -98,9 +110,14 @@ while True:
             to_remove_from_displayed.append(disp)
         else:
             products.remove(disp)
+        if displayed[disp] in shopping_list:
+            displayed[disp].set_style_local_bg_color(0, 0, lv.color_make(128,255,128))
+        else:
+            displayed[disp].set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
     for product in products:
         displayed[product] = product_list.add_btn(None, product)
-        if product in shopping_list:
-            displayed[product].set_style_local_bg_color(0, 0, lv.color_make(128,255,128))
+        # if product in shopping_list:
+        #     displayed[product].set_style_local_bg_color(0, 0, lv.color_make(128,255,128))
+        displayed[product].set_event_cb(product_list_cb)
     for disp in to_remove_from_displayed:
         del displayed[disp]
