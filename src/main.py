@@ -1,10 +1,10 @@
-
-from m5stack_ui import *
+from m5stack_ui import M5Screen
 import time
 from i2c_kb import i2c_kb
 from secrets import grocy_api_key, grocy_domain
 from grocy_api import grocy_api
 import time
+import lvgl as lv
 
 def manage_input_box(kb, textbox):
     kb.poll()
@@ -14,14 +14,37 @@ def manage_input_box(kb, textbox):
     return False
 
 def btn_add_cb(a, b):
-    print("A: {} B: {}".format(a, b))
+    # print("A: {} B: {}".format(a, b))
+    if b == 0:
+        # Touch down
+        pass
+
+def show_msg(msg, x = 0, y = 0):
+    box = lv.msgbox(lv.scr_act())
+    box.set_text(msg)
+    box.align(None, lv.ALIGN.IN_TOP_MID, 0, 0)
+    return box
+
+def show_spinner():
+    preload = lv.spinner(lv.scr_act(), None)
+    preload.set_size(100, 100)
+    preload.align(None, lv.ALIGN.CENTER, 0, 0)
+    return preload
 
 screen = M5Screen()
-screen.clean_screen()
-textarea = M5Textarea(text="Syncing with Grocy...", x=0, y=0, w=320,h=32)
+
+scr = lv.scr_act()
+scr.clean()
+msg = show_msg("Syncing with Grocy...", 10, 10)
+spinner = show_spinner()
+
 g = grocy_api(grocy_api_key, grocy_domain)
 g.sync()
-textarea.set_text("Sync done.")
+
+spinner.delete()
+msg.delete()
+show_msg("Sync done")
+
 keyboard = i2c_kb(interrupt=None)
 
 screen_width = 320
@@ -29,12 +52,18 @@ screen_height = 240
 btn_width = 80
 txt_height = 32
 search_results = ""
-screen.clean_screen()
-buffer_text = M5Textarea( x=0, y=screen_height-txt_height, w=screen_width, h=txt_height)
-product_list = M5List(x=0, y=0)
-product_list.set_size(screen_width-btn_width,screen_height-txt_height)
-btn_add = M5Btn(text="Add", x=screen_width-btn_width, y=0, w=btn_width, h=btn_width)
-btn_add.set_cb(btn_add_cb)
+scr.clean()
+buffer_text = lv.textarea(scr)
+buffer_text.align(None, lv.ALIGN.IN_BOTTOM_MID, 0, 0)
+# buffer_text.set_x(0)
+# buffer_text.set_y(screen_height-txt_height)
+# buffer_text.set_width(screen_width)
+# buffer_text.set_height(txt_height)
+product_list = lv.list(scr)
+product_list.align(None, lv.ALIGN.IN_TOP_MID, 0, 0)
+# product_list.set_size(screen_width-btn_width,screen_height-txt_height)
+# btn_add = M5Btn(text="Add", x=screen_width-btn_width, y=0, w=btn_width, h=btn_width)
+# btn_add.set_cb(btn_add_cb)
 
 print("Looping")
 keyboard.new = True
