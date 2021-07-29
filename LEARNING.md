@@ -11,6 +11,7 @@ pip3 install --user adafruit-ampy
 ampy --port /dev/ttyS3 ls
 ```
 Repl: `screen /dev/ttyS3 115200`
+
 Problem getting REPL: For some reason screen wouldn't connect sometimes. I had to run an ampy ls
 and then it started working again. I assume it sets some parameters on the com port. After a fresh
 flash it seems to reboot a few times? Or something?
