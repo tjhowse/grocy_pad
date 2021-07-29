@@ -25,14 +25,23 @@ def btn_add_cb(obj, event):
         # if we've selected a product in the shopping list.
         global selected_product
         global shopping_list
-        shopping_list.add(selected_product)
+        global btn_add_label
+        if btn_add_label.get_text() == "Add":
+            shopping_list.add(selected_product)
+        else:
+            shopping_list.remove(selected_product)
 
 def product_list_cb(obj, event):
     list_btn = lv.list.__cast__(obj)
     if event == lv.EVENT.CLICKED:
-        # TODO Change the label on the add thing if it's already in the shopping list.
+        # TODO Put all this into its own class and use class member references rather than globals
         global selected_product
+        global shopping_list
         selected_product = list_btn.get_btn_text()
+        if selected_product in shopping_list:
+            btn_add_label.set_text("Remove")
+        else:
+            btn_add_label.set_text("Add")
 
 def show_msg(msg, x = 0, y = 0):
     box = lv.msgbox(lv.scr_act())
@@ -94,7 +103,7 @@ displayed = {}
 while True:
     t = time.ticks_ms()
     flag = False
-    while time.ticks_diff(time.ticks_ms(), t) < 1000 or not flag:
+    while time.ticks_diff(time.ticks_ms(), t) < 800 or not flag:
         if manage_input_box(keyboard, buffer_text):
             # If a button is pressed, restart the timer.
             flag = True
@@ -110,14 +119,14 @@ while True:
             to_remove_from_displayed.append(disp)
         else:
             products.remove(disp)
-        if displayed[disp] in shopping_list:
-            displayed[disp].set_style_local_bg_color(0, 0, lv.color_make(128,255,128))
-        else:
-            displayed[disp].set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
     for product in products:
         displayed[product] = product_list.add_btn(None, product)
-        # if product in shopping_list:
-        #     displayed[product].set_style_local_bg_color(0, 0, lv.color_make(128,255,128))
         displayed[product].set_event_cb(product_list_cb)
     for disp in to_remove_from_displayed:
-        del displayed[disp]
+        displayed.pop(disp)
+    # Highlight items in the shopping list.
+    for p in displayed:
+        if p in shopping_list:
+            displayed[p].set_style_local_bg_color(0, 0, lv.color_make(128,255,128))
+        else:
+            displayed[p].set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
