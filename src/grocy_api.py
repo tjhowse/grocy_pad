@@ -23,25 +23,27 @@ class grocy_api:
                             ]
         self.db_changed_time = None
 
-    def get_db_changed_time(self):
-        ### Returns the time of the last change in the database
+    def get_db_changed(self):
+        ### Returns True if the database has changed since last sync
         url = '{}system/db-changed-time'.format(self.base_url)
         response = requests.get(url, headers=self.headers)
         if response.status_code != 200:
             print(response.text)
         time = json.loads(response.text)
-        return time['changed_time']
+        if self.db_changed_time is None or self.db_changed_time != time['changed_time']:
+            self.db_changed_time = time['changed_time']
+            return True
+        return False
 
     def sync(self):
         ### Syncs the database with the server
-        db_changed_time = self.get_db_changed_time()
-        if self.db_changed_time is None or self.db_changed_time != db_changed_time:
-            self.db_changed_time = db_changed_time
-        else:
-            # Nothing's change since last
+        if not self.get_db_changed():
             return
         for entity in self.entity_names:
             self.sync_entity(entity)
+
+    def sync_shopping_list(self):
+        self.sync_entity("shopping_list")
 
     def sync_entity(self, entity_name):
         url = '{}objects/{}'.format(self.base_url, entity_name)
@@ -87,6 +89,43 @@ class grocy_api:
             product = self.tables['products'][id]
             if name.lower() in product['name'].lower():
                 yield product['name']
+
+    def get_product_id_with_name(self, product_name):
+        ### Returns the product id of a product with the given name
+        for id in self.tables['products']:
+            product = self.tables['products'][id]
+            if product['name'] == product_name:
+                return product['id']
+        return None
+
+    def add_product_to_shopping_list(self, product):
+        ### Adds a product to the shopping list by name
+        url = '{}stock/shoppinglist/add-product'.format(self.base_url)
+        add =   {
+                    "product_id": self.get_product_id_with_name(product),
+                    "list_id": 1,
+                    "product_amount": 1,
+                    "note": ""
+                }
+        response = requests.post(url, headers=self.headers, data=json.dumps(add))
+        print(response)
+        if response.status_code != 204:
+            print(response.text)
+        return response.text
+
+    def remove_product_from_shopping_list(self, product):
+        ### Removes a product to the shopping list by name
+        url = '{}stock/shoppinglist/remove-product'.format(self.base_url)
+        add =   {
+                    "product_id": self.get_product_id_with_name(product),
+                    "list_id": 1,
+                    "product_amount": 1,
+                }
+        response = requests.post(url, headers=self.headers, data=json.dumps(add))
+        print(response)
+        if response.status_code != 204:
+            print(response.text)
+        return response.text
 
 if __name__ == '__main__':
     key = os.getenv('GROCY_API_KEY')
