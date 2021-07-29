@@ -3,24 +3,34 @@ from common import *
 class page_shopping_list:
     def btn_add_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
+            if not self.selected_product:
+                return
             if self.btn_add_label.get_text() == "Add":
                 self.shopping_list.add(self.selected_product)
                 self.g.add_product_to_shopping_list(self.selected_product)
             else:
                 self.shopping_list.remove(self.selected_product)
                 self.g.remove_product_from_shopping_list(self.selected_product)
+            self.selected_product = ""
+            self.btn_add_label.set_text("Add")
             self.g.sync_shopping_list()
             self.highlight_products_on_shopping_list()
+
+    def btn_view_cb(self, obj, event):
+        if event == lv.EVENT.CLICKED:
+            pass
+            # TODO Toggle a mode to only show stuff that is on the shopping list.
 
     def btn_clear_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
             self.buffer_text.set_text("")
+            self.selected_product = ""
             self.keyboard.clear_buffer()
             self.keyboard.new = True
 
     def product_list_cb(self, obj, event):
-        list_btn = lv.list.__cast__(obj)
         if event == lv.EVENT.CLICKED:
+            list_btn = lv.list.__cast__(obj)
             self.selected_product = list_btn.get_btn_text()
             if self.selected_product in self.shopping_list:
                 self.btn_add_label.set_text("Remove")
@@ -34,6 +44,7 @@ class page_shopping_list:
 
         self.shopping_list = set(self.g.get_shopping_list())
         self.keyboard = i2c_kb(interrupt=None)
+        self.selected_product = ""
 
         self.buffer_text = lv.textarea(scr)
         self.buffer_text.set_width(SCREEN_WIDTH)
@@ -42,6 +53,7 @@ class page_shopping_list:
         self.product_list = lv.list(scr)
         self.product_list.set_size(SCREEN_WIDTH-btn_width, SCREEN_HEIGHT-txt_height)
         self.product_list.align(None, lv.ALIGN.IN_TOP_LEFT, 0, 0)
+
         self.btn_add = lv.btn(scr)
         self.btn_add.set_width(btn_width)
         self.btn_add.set_height(btn_width)
@@ -50,7 +62,16 @@ class page_shopping_list:
         self.btn_add.set_event_cb(self.btn_add_cb)
         self.btn_add_label = lv.label(self.btn_add)
         self.btn_add_label.set_text("Add")
-        self.selected_product = ""
+
+        self.btn_view = lv.btn(scr)
+        self.btn_view.set_width(btn_width)
+        self.btn_view.set_height(btn_width)
+        self.btn_view.set_style_local_radius(lv.btn.PART.MAIN,lv.STATE.DEFAULT,btn_corner_radius)
+        self.btn_view.align(None, lv.ALIGN.IN_TOP_RIGHT, 0,btn_width)
+        self.btn_view.set_event_cb(self.btn_view_cb)
+        self.btn_view_label = lv.label(self.btn_view)
+        self.btn_view_label.set_text("View\nList")
+
         self.btn_clear = lv.btn(scr)
         self.btn_clear.set_width(btn_width)
         self.btn_clear.set_height(int(btn_width/2))
