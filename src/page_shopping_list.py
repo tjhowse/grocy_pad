@@ -18,15 +18,17 @@ class page_shopping_list:
 
     def btn_view_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
-            pass
-            # TODO Toggle a mode to only show stuff that is on the shopping list.
+            if self.mode == "browse":
+                self.mode = "view"
+                self.btn_view_label.set_text("Browse")
+            else:
+                self.mode = "browse"
+                self.btn_view_label.set_text("View\nList")
+            self.reset_entry_state()
 
     def btn_clear_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
-            self.buffer_text.set_text("")
-            self.selected_product = ""
-            self.keyboard.clear_buffer()
-            self.keyboard.new = True
+            self.reset_entry_state()
 
     def product_list_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
@@ -37,6 +39,12 @@ class page_shopping_list:
             else:
                 self.btn_add_label.set_text("Add")
 
+    def reset_entry_state(self):
+        self.buffer_text.set_text("")
+        self.selected_product = ""
+        self.keyboard.clear_buffer()
+        self.keyboard.new = True
+
     def __init__(self, grocy):
         self.g = grocy
         scr = lv.scr_act()
@@ -45,6 +53,7 @@ class page_shopping_list:
         self.shopping_list = set(self.g.get_shopping_list())
         self.keyboard = i2c_kb(interrupt=None)
         self.selected_product = ""
+        self.mode = "browse"
 
         self.buffer_text = lv.textarea(scr)
         self.buffer_text.set_width(SCREEN_WIDTH)
@@ -90,6 +99,22 @@ class page_shopping_list:
             else:
                 self.displayed[p].set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
 
+    def sync_displayed_products(self, products):
+        to_remove_from_displayed = []
+        for disp in self.displayed:
+            if disp not in products:
+                i = self.product_list.get_btn_index(self.displayed[disp])
+                self.product_list.remove(i)
+                to_remove_from_displayed.append(disp)
+            else:
+                products.remove(disp)
+        for product in products:
+            self.displayed[product] = self.product_list.add_btn(None, product)
+            self.displayed[product].set_event_cb(self.product_list_cb)
+        for disp in to_remove_from_displayed:
+            self.displayed.pop(disp)
+        self.highlight_products_on_shopping_list()
+
     def mainloop(self):
         print("Looping")
         self.keyboard.new = True
@@ -103,19 +128,9 @@ class page_shopping_list:
                     # If a button is pressed, restart the timer.
                     flag = True
                     t = time.ticks_ms()
-            # Things have been set in motion...
-            products = list(self.g.search_product_names_by_name(self.buffer_text.get_text()))
-            to_remove_from_displayed = []
-            for disp in self.displayed:
-                if disp not in products:
-                    i = self.product_list.get_btn_index(self.displayed[disp])
-                    self.product_list.remove(i)
-                    to_remove_from_displayed.append(disp)
-                else:
-                    products.remove(disp)
-            for product in products:
-                self.displayed[product] = self.product_list.add_btn(None, product)
-                self.displayed[product].set_event_cb(self.product_list_cb)
-            for disp in to_remove_from_displayed:
-                self.displayed.pop(disp)
-            self.highlight_products_on_shopping_list()
+            if self.mode == "browse":
+                products = list(self.g.search_product_names_by_name(self.buffer_text.get_text()))
+                self.sync_displayed_products(products)
+            elif self.mode == "view":
+                # This passes in a copy of the shopping list set
+                self.sync_displayed_products(list(self.shopping_list))
