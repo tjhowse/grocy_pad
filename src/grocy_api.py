@@ -42,7 +42,7 @@ class grocy_api:
 
     def sync_required(self):
         ### Returns true if it's been more than self.SYNC_RATE_MS since a sync.
-        return time.ticks_diff(time.ticks_ms(), self.last_sync_time) < self.SYNC_RATE_MS
+        return time.ticks_diff(time.ticks_ms(), self.last_sync_time) > self.SYNC_RATE_MS
 
     def sync(self, force=False):
         ### Syncs the database with the server
