@@ -8,6 +8,9 @@ import json
 import os
 
 class grocy_api:
+    # Don't sync with the server inside this timeframe unless forced
+    SYNC_RATE_MS = 120*1000
+
     def __init__(self, api_key, domain):
         self.base_url = '{}/api/'.format(domain)
         self.headers = {
@@ -22,6 +25,7 @@ class grocy_api:
                                 # 'shopping_lists',
                             ]
         self.db_changed_time = None
+        self.last_sync_time = 0
 
     def get_db_changed(self):
         ### Returns True if the database has changed since last sync
@@ -35,8 +39,11 @@ class grocy_api:
             return True
         return False
 
-    def sync(self):
+    def sync(self, force=False):
         ### Syncs the database with the server
+        if time.ticks_diff(time.ticks_ms(), self.last_sync_time) < self.SYNC_RATE_MS and not force:
+            return
+        self.last_sync_time = time.ticks_ms()
         if not self.get_db_changed():
             return
         for entity in self.entity_names:
@@ -44,6 +51,16 @@ class grocy_api:
 
     def sync_shopping_list(self):
         self.sync_entity("shopping_list")
+
+    def set_shopping_list(self, sl):
+        ### Adds and removes products from the shopping list
+        self.sync_shopping_list()
+        current = set(self.get_shopping_list())
+        # Using sets like this minimises the number of calls to the API.
+        for product in (sl - current):
+            self.add_product_to_shopping_list(product)
+        for product in (current - sl):
+            self.remove_product_from_shopping_list(product)
 
     def sync_entity(self, entity_name):
         url = '{}objects/{}'.format(self.base_url, entity_name)

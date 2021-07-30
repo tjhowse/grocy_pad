@@ -12,6 +12,12 @@ btn_width = 80
 btn_corner_radius = 20
 txt_height = 32
 
+KB_ENTRY_COMMIT_TIMEOUT_MS = 800
+# Wait for this much idle time before triggering a shopping list sync
+CHANGE_SYNC_MS = 5*1000
+# Wait for this much idle time before triggering a full grocy sync
+IDLE_SYNC_MS = 120*1000
+
 def show_msg(msg, x = 0, y = 0):
     box = lv.msgbox(lv.scr_act())
     box.set_text(msg)
