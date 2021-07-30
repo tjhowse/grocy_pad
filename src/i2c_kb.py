@@ -36,6 +36,7 @@ class i2c_kb:
     self.cursor = 0
     self.char = bytearray(1)
     self.new = False
+    self.char_callbacks = {}
     if interrupt is not None:
       self.interrupt_pin = Pin(interrupt, Pin.IN)
       # Don't be tempted to change this to IRQ_RISING. I tried it, it doesn't work.
@@ -60,9 +61,12 @@ class i2c_kb:
         # Backspace.
         self.cursor -= 1
       else:
-        self.buffer[self.cursor] = self.char
-        self.cursor += 1
-      self.new = True
+        if self.char in self.char_callbacks:
+          self.char_callbacks[self.char]()
+        else:
+          self.buffer[self.cursor] = self.char
+          self.cursor += 1
+          self.new = True
       # Bounds check cursor
       self.cursor = min(max(self.cursor, 0), self.buffer_size-1)
 
@@ -78,3 +82,10 @@ class i2c_kb:
 
   def get_buffer_as_string(self):
     return ''.join(map(chr, self.get_buffer()))
+
+  def register_char_callback(self, char, cb):
+    # Register a callback to be called when a certain character is read.
+    self.char_callbacks[char] = cb
+
+  def clear_char_callbacks(self):
+    self.char_callbacks = {}

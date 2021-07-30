@@ -96,6 +96,14 @@ class page_shopping_list:
         self.btn_clear_label.set_text("Clear")
         self.selected_product = ""
 
+        # 255 is the wifi symbol on the M5 FACES QWERTY keyboard. sym+$
+        self.keyboard.register_char_callback(255, self.force_grocy_sync)
+
+    def force_grocy_sync(self):
+        spinner = show_spinner()
+        self.g.sync(force=True)
+        spinner.delete()
+
     def highlight_products_on_shopping_list(self):
         # Highlight items in the shopping list.
         for p in self.displayed:

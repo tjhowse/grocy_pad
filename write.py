@@ -28,10 +28,11 @@ for file in toFlash:
     if file in flashed and (get_digest("./flashed/" + file) == get_digest("./src/" + file)):
         print("File " + file + " already flashed")
         continue
+    if not file.endswith(".py"):
+        continue
+    print("Updating " + file)
     subprocess.call(['pylint', '-E', './src/' + file, '-d', 'E1101,E0401'])
     try:
-        if not file.endswith(".py"):
-            continue
         subprocess.check_output(['ampy', '-p', '/dev/ttyS3', 'put', './src/' + file])
         subprocess.check_output(['cp', '-r', './src/' + file, './flashed/' + file])
         print("Updated " + file)
