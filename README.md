@@ -8,3 +8,14 @@ It should run on other ESP32-based hardware with suitable modification. Do yours
 ## Videos
 
 https://www.youtube.com/playlist?list=PLT7ckgz8vcoZQXg738lWLX3vyoRwWtYmF
+
+## Setup
+
+Create a `secrets.py` and include that on your device, along with everything in the `src` directory.
+
+```python
+ssid = 'myverysecretssid'
+password = 'myequallysecretpassword'
+grocy_api_key = 'beansbeansbeansbeansbeansbeansbeans'
+grocy_domain = 'http://192.168.1.100:3000'
+```
