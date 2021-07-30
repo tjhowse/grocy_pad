@@ -123,20 +123,24 @@ class page_shopping_list:
             kb_timeout = time.ticks_ms()
             flag = False
             idle_time_ms = 0
-            while idle_time_ms < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag:
-                idle_time_ms = time.ticks_diff(time.ticks_ms(), kb_timeout)
+            while time.ticks_diff(time.ticks_ms(), kb_timeout) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag:
                 if manage_input_box(self.keyboard, self.buffer_text):
                     # If a button is pressed, restart the timer.
                     flag = True
                     kb_timeout = time.ticks_ms()
+                idle_time_ms = time.ticks_diff(time.ticks_ms(), kb_timeout)
                 if idle_time_ms > CHANGE_SYNC_MS and self.shopping_list_changed:
                     # If we are idle for a while, sync the shopping list with grocy.
-                    self.g.sync()
+                    spinner = show_spinner()
+                    self.g.sync(force=True)
                     self.g.set_shopping_list(self.shopping_list)
                     self.shopping_list_changed = False
+                    spinner.delete()
                 if idle_time_ms > IDLE_SYNC_MS:
                     # If we are idle for a long while, trigger a background sync.
+                    spinner = show_spinner()
                     self.g.sync()
+                    spinner.delete()
             if self.mode == "browse":
                 products = list(self.g.search_product_names_by_name(self.buffer_text.get_text()))
                 self.sync_displayed_products(products)

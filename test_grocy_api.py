@@ -6,11 +6,11 @@ g = grocy_api(grocy_api_key, grocy_domain)
 g.sync()
 
 for b in g.get_shopping_list():
-    print(b)
+    print('"{}"'.format(b))
 
-g.add_product_to_shopping_list("Honey")
+# g.add_product_to_shopping_list("Honey")
 
-g.sync()
+# g.sync()
 
-for b in g.get_shopping_list():
-    print(b)
+# for b in g.get_shopping_list():
+#     print(b)

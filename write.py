@@ -28,7 +28,7 @@ for file in toFlash:
     if file in flashed and (get_digest("./flashed/" + file) == get_digest("./src/" + file)):
         print("File " + file + " already flashed")
         continue
-    subprocess.call(['pylint', '-E', './src/' + file, '-d', 'E1101'])
+    subprocess.call(['pylint', '-E', './src/' + file, '-d', 'E1101,E0401'])
     try:
         if not file.endswith(".py"):
             continue
