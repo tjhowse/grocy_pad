@@ -3,6 +3,7 @@ from common import *
 class page_shopping_list:
     def btn_add_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
+            self.input_ticks = time.ticks_ms()
             if not self.selected_product:
                 return
             if self.btn_add_label.get_text() == "Add":
@@ -16,6 +17,7 @@ class page_shopping_list:
 
     def btn_view_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
+            self.input_ticks = time.ticks_ms()
             if self.mode == "browse":
                 self.mode = "view"
                 self.btn_view_label.set_text("Browse")
@@ -26,10 +28,12 @@ class page_shopping_list:
 
     def btn_clear_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
+            self.input_ticks = time.ticks_ms()
             self.reset_entry_state()
 
     def product_list_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
+            self.input_ticks = time.ticks_ms()
             list_btn = lv.list.__cast__(obj)
             self.selected_product = list_btn.get_btn_text()
             if self.selected_product in self.shopping_list:
@@ -53,6 +57,8 @@ class page_shopping_list:
         self.selected_product = ""
         self.mode = "browse"
         self.shopping_list_changed = False
+        # This stores the time of the last key or button press.
+        self.input_ticks = 0
 
         self.buffer_text = lv.textarea(scr)
         self.buffer_text.set_width(SCREEN_WIDTH)
@@ -120,23 +126,23 @@ class page_shopping_list:
         products = []
         self.displayed = {}
         while True:
-            kb_timeout = time.ticks_ms()
+            self.input_ticks = time.ticks_ms()
             flag = False
             idle_time_ms = 0
-            while time.ticks_diff(time.ticks_ms(), kb_timeout) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag:
+            while time.ticks_diff(time.ticks_ms(), self.input_ticks) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag:
                 if manage_input_box(self.keyboard, self.buffer_text):
                     # If a button is pressed, restart the timer.
                     flag = True
-                    kb_timeout = time.ticks_ms()
-                idle_time_ms = time.ticks_diff(time.ticks_ms(), kb_timeout)
+                    self.input_ticks = time.ticks_ms()
+                idle_time_ms = time.ticks_diff(time.ticks_ms(), self.input_ticks)
                 if idle_time_ms > CHANGE_SYNC_MS and self.shopping_list_changed:
                     # If we are idle for a while, sync the shopping list with grocy.
                     spinner = show_spinner()
-                    self.g.sync(force=True)
+                    self.g.sync()
                     self.g.set_shopping_list(self.shopping_list)
                     self.shopping_list_changed = False
                     spinner.delete()
-                if idle_time_ms > IDLE_SYNC_MS:
+                if idle_time_ms > IDLE_SYNC_MS and self.g.sync_required():
                     # If we are idle for a long while, trigger a background sync.
                     spinner = show_spinner()
                     self.g.sync()

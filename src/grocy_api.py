@@ -40,9 +40,13 @@ class grocy_api:
             return True
         return False
 
+    def sync_required(self):
+        ### Returns true if it's been more than self.SYNC_RATE_MS since a sync.
+        return time.ticks_diff(time.ticks_ms(), self.last_sync_time) < self.SYNC_RATE_MS
+
     def sync(self, force=False):
         ### Syncs the database with the server
-        if time.ticks_diff(time.ticks_ms(), self.last_sync_time) < self.SYNC_RATE_MS and not force:
+        if not self.sync_required() and not force:
             return
         self.last_sync_time = time.ticks_ms()
         if not self.get_db_changed():
@@ -126,10 +130,8 @@ class grocy_api:
                     "note": ""
                 }
         response = requests.post(url, headers=self.headers, data=json.dumps(add))
-        print(response)
         if response.status_code != 204:
             print(response.text)
-        return response.text
 
     def remove_product_from_shopping_list(self, product):
         ### Removes a product to the shopping list by name
@@ -140,10 +142,8 @@ class grocy_api:
                     "product_amount": 1,
                 }
         response = requests.post(url, headers=self.headers, data=json.dumps(add))
-        print(response)
         if response.status_code != 204:
             print(response.text)
-        return response.text
 
 if __name__ == '__main__':
     key = os.getenv('GROCY_API_KEY')
