@@ -57,9 +57,10 @@ class grocy_api:
     def sync_shopping_list(self):
         self.sync_entity("shopping_list")
 
-    def set_shopping_list(self, sl):
+    def set_shopping_list(self, sl, skip_sync = False):
         ### Adds and removes products from the shopping list
-        self.sync_shopping_list()
+        if not skip_sync:
+            self.sync_shopping_list()
         current = set(self.get_shopping_list())
         # Using sets like this minimises the number of calls to the API.
         for product in (sl - current):

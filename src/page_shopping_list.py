@@ -154,6 +154,7 @@ class page_shopping_list:
                     # If we are idle for a long while, trigger a background sync.
                     spinner = show_spinner()
                     self.g.sync()
+                    self.shopping_list = set(self.g.get_shopping_list(skip_sync = True))
                     spinner.delete()
             if self.mode == "browse":
                 products = list(self.g.search_product_names_by_name(self.buffer_text.get_text()))
