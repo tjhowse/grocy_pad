@@ -23,7 +23,7 @@ class grocy_api:
                                 # 'recipes',
                                 # 'quantity_units',
                                 'shopping_list',
-                                # 'shopping_lists',
+                                'stock',
                             ]
         self.db_changed_time = None
         self.last_sync_time = 0
@@ -81,10 +81,13 @@ class grocy_api:
     def get_shopping_list(self):
         for id in self.tables['shopping_list']:
             product = self.tables['shopping_list'][id]
-            # amount = product['amount']
-            # unit = self.tables['quantity_units'][product['qu_id']]['name']
             name = self.tables['products'][product['product_id']]['name']
-            # yield (name, amount, unit)
+            yield name
+
+    def get_stock_list(self):
+        for id in self.tables['stock']:
+            product = self.tables['stock'][id]
+            name = self.tables['products'][product['product_id']]['name']
             yield name
 
     def get_recipe_list(self):
@@ -107,11 +110,16 @@ class grocy_api:
 
     def search_product_names_by_name(self, name):
         ### Generates a list of product names.
-        result = []
         for id in self.tables['products']:
             product = self.tables['products'][id]
             if name.lower() in product['name'].lower():
                 yield product['name']
+
+    def search_stocked_product_names_by_name(self, name):
+        ### Generates a list of product names.
+        for stock_name in self.get_stock_list():
+            if name.lower() in stock_name.lower():
+                yield stock_name
 
     def get_product_id_with_name(self, product_name):
         ### Returns the product id of a product with the given name

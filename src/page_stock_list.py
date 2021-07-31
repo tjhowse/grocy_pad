@@ -1,28 +1,34 @@
 from common import *
 
-class page_shopping_list:
+class page_stock_list:
     def btn_add_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
             self.input_ticks = time.ticks_ms()
-            if not self.selected_product:
-                return
-            if self.btn_add_label.get_text() == "Add":
-                self.shopping_list.add(self.selected_product)
+            if self.btn_add_label.get_text() == "Mark\nBought":
+                for disp in self.displayed:
+                    if self.displayed[disp].get_style_bg_color(0).color_to32() != 4294967295:
+                        # This is selected, remove it from the shopping list and add it to the stock list
+                        self.shopping_list.remove(disp)
+                        self.shopping_list_changed = True
+                        # TODO add it to the stock list. Probably use a local sync system like the shopping list.
             else:
-                self.shopping_list.remove(self.selected_product)
+                for disp in self.displayed:
+                    if self.displayed[disp].get_style_bg_color(0).color_to32() != 4294967295:
+                        # This is selected, remove it from the stock list
+                        # TODO remove it from the stock list
+                        pass
             self.selected_product = ""
-            self.btn_add_label.set_text("Add")
-            self.shopping_list_changed = True
-            self.highlight_products_on_shopping_list()
 
     def btn_view_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
             self.input_ticks = time.ticks_ms()
-            if self.mode == "products":
+            if self.mode == "stocks":
                 self.mode = "shopping_list"
-                self.btn_view_label.set_text("Products")
+                self.btn_add_label.set_text("Mark\nBought")
+                self.btn_view_label.set_text("Stocks")
             else:
-                self.mode = "products"
+                self.mode = "stocks"
+                self.btn_add_label.set_text("Mark\nUsed")
                 self.btn_view_label.set_text("Shop\nList")
             self.reset_entry_state()
 
@@ -36,10 +42,16 @@ class page_shopping_list:
             self.input_ticks = time.ticks_ms()
             list_btn = lv.list.__cast__(obj)
             self.selected_product = list_btn.get_btn_text()
-            if self.selected_product in self.shopping_list:
-                self.btn_add_label.set_text("Remove")
+            colour = list_btn.get_style_bg_color(0).color_to32()
+            # lv.color_make(128,255,128).color_to32() == 4286840707
+            # lv.color_make(255,128,128).color_to32() == 4294934915
+            # lv.color_make(255,255,255).color_to32() == 4294967295
+            if colour == 4294967295:
+                # If it was white, set it to red.
+                list_btn.set_style_local_bg_color(0, 0, lv.color_make(255,128,128))
             else:
-                self.btn_add_label.set_text("Add")
+                # Else make it white
+                list_btn.set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
 
     def reset_entry_state(self):
         self.buffer_text.set_text("")
@@ -51,12 +63,12 @@ class page_shopping_list:
         self.g = grocy
         scr = lv.scr_act()
         scr.clean()
-        scr.set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
+        scr.set_style_local_bg_color(0, 0, lv.color_make(255,0,0))
 
         self.shopping_list = set(self.g.get_shopping_list())
         self.keyboard = i2c_kb(interrupt=None)
         self.selected_product = ""
-        self.mode = "products"
+        self.mode = "stocks"
         self.shopping_list_changed = False
         # This stores the time of the last key or button press.
         self.input_ticks = 0
@@ -76,7 +88,7 @@ class page_shopping_list:
         self.btn_add.align(None, lv.ALIGN.IN_TOP_RIGHT, 0,0)
         self.btn_add.set_event_cb(self.btn_add_cb)
         self.btn_add_label = lv.label(self.btn_add)
-        self.btn_add_label.set_text("Add")
+        self.btn_add_label.set_text("Mark\nUsed")
 
         self.btn_view = lv.btn(scr)
         self.btn_view.set_width(btn_width)
@@ -157,8 +169,8 @@ class page_shopping_list:
                     self.g.sync()
                     self.shopping_list = set(self.g.get_shopping_list())
                     spinner.delete()
-            if self.mode == "products":
-                products = list(self.g.search_product_names_by_name(self.buffer_text.get_text()))
+            if self.mode == "stocks":
+                products = list(self.g.search_stocked_product_names_by_name(self.buffer_text.get_text()))
                 self.sync_displayed_products(products)
             elif self.mode == "shopping_list":
                 # This passes in a copy of the shopping list set

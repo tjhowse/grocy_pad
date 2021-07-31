@@ -11,6 +11,10 @@ https://www.youtube.com/playlist?list=PLT7ckgz8vcoZQXg738lWLX3vyoRwWtYmF
 
 ## Setup
 
+Use M5Burner (Closed source software! Boo! Hiss!) to write the latest version of the UIFlow firmware to your device.
+
+You may like to use the `write.py` script to help with flashing things to your device.
+
 Create a `secrets.py` and include that on your device, along with everything in the `src` directory.
 
 ```python
