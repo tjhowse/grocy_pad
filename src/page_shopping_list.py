@@ -145,7 +145,7 @@ class page_shopping_list:
             self.input_ticks = time.ticks_ms()
             flag = False
             idle_time_ms = 0
-            while time.ticks_diff(time.ticks_ms(), self.input_ticks) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag and self.running:
+            while (time.ticks_diff(time.ticks_ms(), self.input_ticks) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag) and self.running:
                 if manage_input_box(self.keyboard, self.buffer_text):
                     # If a button is pressed, restart the timer.
                     flag = True

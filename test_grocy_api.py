@@ -9,6 +9,8 @@ for b in g.get_shopping_list():
     print('"{}"'.format(b))
 
 # g.add_product_to_shopping_list("Honey")
+g.remove_product_from_stock("Egg")
+g.add_product_to_stock("Egg")
 
 # g.sync()
 

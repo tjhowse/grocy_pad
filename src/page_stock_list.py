@@ -4,20 +4,26 @@ class page_stock_list:
     def btn_add_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
             self.input_ticks = time.ticks_ms()
+            stocks_changed = False
             if self.btn_add_label.get_text() == "Mark\nBought":
                 for disp in self.displayed:
-                    if self.displayed[disp].get_style_bg_color(0).color_to32() != 4294967295:
+                    if self.displayed[disp].get_style_bg_color(0).color_to32() == 4294934915:
                         # This is selected, remove it from the shopping list and add it to the stock list
+                        print("Removing {} from shopping list and adding to stocks".format(disp))
                         self.shopping_list.remove(disp)
                         self.shopping_list_changed = True
-                        # TODO add it to the stock list. Probably use a local sync system like the shopping list.
+                        self.g.add_product_to_stock(disp)
+                        stocks_changed = True
             else:
                 for disp in self.displayed:
-                    if self.displayed[disp].get_style_bg_color(0).color_to32() != 4294967295:
+                    if self.displayed[disp].get_style_bg_color(0).color_to32() == 4294934915:
                         # This is selected, remove it from the stock list
-                        # TODO remove it from the stock list
-                        pass
-            self.selected_product = ""
+                        print("Removing {} from stocks".format(disp))
+                        self.g.remove_product_from_stock(disp)
+                        stocks_changed = True
+            if stocks_changed:
+                self.g.sync()
+            self.reset_entry_state()
 
     def btn_view_cb(self, obj, event):
         if event == lv.EVENT.CLICKED:
@@ -41,23 +47,26 @@ class page_stock_list:
         if event == lv.EVENT.CLICKED:
             self.input_ticks = time.ticks_ms()
             list_btn = lv.list.__cast__(obj)
-            self.selected_product = list_btn.get_btn_text()
             colour = list_btn.get_style_bg_color(0).color_to32()
+            print("Tapped colour {}".format(colour))
+            # Note some of these colours don't correspond properly for reasons I haven't
+            # worked out yet. I think maybe the "selected" state tints a row slightly?
             # lv.color_make(128,255,128).color_to32() == 4286840707
             # lv.color_make(255,128,128).color_to32() == 4294934915
             # lv.color_make(255,255,255).color_to32() == 4294967295
-            if colour == 4294967295:
-                # If it was white, set it to red.
-                list_btn.set_style_local_bg_color(0, 0, lv.color_make(255,128,128))
-            else:
+            if colour != 4294966015:
                 # Else make it white
                 list_btn.set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
+            else:
+                # If it was white, set it to red.
+                list_btn.set_style_local_bg_color(0, 0, lv.color_make(255,128,128))
 
     def reset_entry_state(self):
         self.buffer_text.set_text("")
-        self.selected_product = ""
         self.keyboard.clear_buffer()
         self.keyboard.new = True
+        for disp in self.displayed:
+            self.displayed[disp].set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
 
     def __init__(self, grocy):
         self.g = grocy
@@ -67,7 +76,6 @@ class page_stock_list:
 
         self.shopping_list = set(self.g.get_shopping_list())
         self.keyboard = i2c_kb(interrupt=None)
-        self.selected_product = ""
         self.mode = "stocks"
         self.shopping_list_changed = False
         # This stores the time of the last key or button press.
@@ -107,7 +115,6 @@ class page_stock_list:
         self.btn_clear.set_event_cb(self.btn_clear_cb)
         self.btn_clear_label = lv.label(self.btn_clear)
         self.btn_clear_label.set_text("Clear")
-        self.selected_product = ""
 
         # 255 is the wifi symbol on the M5 FACES QWERTY keyboard. sym+$
         self.keyboard.register_char_callback(255, self.force_grocy_sync)
@@ -123,14 +130,6 @@ class page_stock_list:
         self.g.sync(force=True)
         spinner.delete()
 
-    def highlight_products_on_shopping_list(self):
-        # Highlight items in the shopping list.
-        for p in self.displayed:
-            if p in self.shopping_list:
-                self.displayed[p].set_style_local_bg_color(0, 0, lv.color_make(128,255,128))
-            else:
-                self.displayed[p].set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
-
     def sync_displayed_products(self, products):
         to_remove_from_displayed = []
         for disp in self.displayed:
@@ -145,7 +144,6 @@ class page_stock_list:
             self.displayed[product].set_event_cb(self.product_list_cb)
         for disp in to_remove_from_displayed:
             self.displayed.pop(disp)
-        self.highlight_products_on_shopping_list()
 
     def mainloop(self):
         print("Looping")
@@ -157,7 +155,7 @@ class page_stock_list:
             self.input_ticks = time.ticks_ms()
             flag = False
             idle_time_ms = 0
-            while time.ticks_diff(time.ticks_ms(), self.input_ticks) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag and self.running:
+            while (time.ticks_diff(time.ticks_ms(), self.input_ticks) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag) and self.running:
                 if manage_input_box(self.keyboard, self.buffer_text):
                     # If a button is pressed, restart the timer.
                     flag = True
