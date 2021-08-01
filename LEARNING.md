@@ -112,3 +112,28 @@ c = lvgl.color_make(255,255,255)
 a.set_style_local_bg_color(0, 0, c) # Egg, from above
 # Fuck yeah!
 ```
+
+# RGB Bars
+
+The m5stack faces base has two strips of 5 ws2812 LEDs down the side. I started playing with them. The m5 stuff gives you
+the `rgb` object, but it's hardcoded to use pin 25, for some reason. The base docs say the LEDs are on pin 15, but if you
+transpose the pin maps from the core to the core2 layout it becomes pin 2.
+
+https://docs.m5stack.com/en/core/basic?id=pinmap
+https://docs.m5stack.com/en/core/core2?id=pinmap
+
+```python
+from neopixel import NeoPixel
+import machine
+from m5stack import rgb
+rgb.np
+# Neopixel(Pin=25, Pixels: 10, bit/pix=24, RMTChannel=7, PixBufLen=40, Color order: 'GRB'
+#          Timings (ns): T1H=600, T1L=700, T0H=350, T0L=800, Treset=80000
+# )
+# Note different capitalisation. It looks like the m5stack version of the neopixel library is different?
+np = NeoPixel(machine.Pin(2),10)
+def all(colour):
+    for i in range(10):
+        np[i] = colour
+    np.write()
+```

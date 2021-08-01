@@ -164,7 +164,7 @@ class grocy_api:
         add =   {
                     "product_id": self.get_product_id_with_name(product),
                     "list_id": 1,
-                    "product_amount": 1,
+                    "product_amount": 1000,
                 }
         response = requests.post(url, headers=self.headers, data=json.dumps(add))
         if response.status_code != 204:

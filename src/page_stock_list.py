@@ -5,6 +5,8 @@ class page_stock_list:
         if event == lv.EVENT.CLICKED:
             self.input_ticks = time.ticks_ms()
             stocks_changed = False
+
+            spinner = show_spinner()
             if self.btn_add_label.get_text() == "Mark\nBought":
                 for disp in self.displayed:
                     if self.displayed[disp].get_style_bg_color(0).color_to32() == 4294934915:
@@ -21,8 +23,11 @@ class page_stock_list:
                         print("Removing {} from stocks".format(disp))
                         self.g.remove_product_from_stock(disp)
                         stocks_changed = True
+            spinner.delete()
             if stocks_changed:
+                spinner = show_spinner()
                 self.g.sync()
+                spinner.delete()
             self.reset_entry_state()
 
     def btn_view_cb(self, obj, event):
