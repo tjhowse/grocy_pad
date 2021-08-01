@@ -13,6 +13,13 @@ spinner.delete()
 msg.delete()
 show_msg("Sync done")
 
-sl = page_shopping_list(g)
-# sl = page_stock_list(g)
-sl.mainloop()
+page_name = 'shopping_list'
+
+while True:
+    print("Starting page {}".format(page_name))
+    if page_name == 'shopping_list':
+        page = page_shopping_list(g)
+        page_name = page.mainloop()
+    elif page_name == 'stock_list':
+        page = page_stock_list(g)
+        page_name = page.mainloop()

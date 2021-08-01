@@ -111,6 +111,12 @@ class page_stock_list:
 
         # 255 is the wifi symbol on the M5 FACES QWERTY keyboard. sym+$
         self.keyboard.register_char_callback(255, self.force_grocy_sync)
+        btnA.wasPressed(self.buttonA_wasPressed)
+
+    def buttonA_wasPressed(self):
+        self.return_code = 'shopping_list'
+        self.running = False
+        print("Button A pressed, launching page {}".format(self.return_code))
 
     def force_grocy_sync(self):
         spinner = show_spinner()
@@ -146,11 +152,12 @@ class page_stock_list:
         self.keyboard.new = True
         products = []
         self.displayed = {}
-        while True:
+        self.running = True
+        while self.running:
             self.input_ticks = time.ticks_ms()
             flag = False
             idle_time_ms = 0
-            while time.ticks_diff(time.ticks_ms(), self.input_ticks) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag:
+            while time.ticks_diff(time.ticks_ms(), self.input_ticks) < KB_ENTRY_COMMIT_TIMEOUT_MS or not flag and self.running:
                 if manage_input_box(self.keyboard, self.buffer_text):
                     # If a button is pressed, restart the timer.
                     flag = True
@@ -175,3 +182,5 @@ class page_stock_list:
             elif self.mode == "shopping_list":
                 # This passes in a copy of the shopping list set
                 self.sync_displayed_products(list(self.shopping_list))
+        lv.scr_act().clean()
+        return self.return_code

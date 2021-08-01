@@ -5,6 +5,7 @@ from secrets import grocy_api_key, grocy_domain
 from grocy_api import grocy_api
 import time
 import lvgl as lv
+from m5stack import btnA, btnB, btnC
 
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 240
