@@ -150,6 +150,13 @@ class page_stock_list:
         for disp in to_remove_from_displayed:
             self.displayed.pop(disp)
 
+    def sync_shopping_list(self):
+        spinner = show_spinner()
+        self.g.sync()
+        self.g.set_shopping_list(self.shopping_list)
+        self.shopping_list_changed = False
+        spinner.delete()
+
     def mainloop(self):
         print("Looping")
         self.keyboard.new = True
@@ -168,11 +175,7 @@ class page_stock_list:
                 idle_time_ms = time.ticks_diff(time.ticks_ms(), self.input_ticks)
                 if idle_time_ms > CHANGE_SYNC_MS and self.shopping_list_changed:
                     # If we are idle for a while, sync the shopping list with grocy.
-                    spinner = show_spinner()
-                    self.g.sync()
-                    self.g.set_shopping_list(self.shopping_list)
-                    self.shopping_list_changed = False
-                    spinner.delete()
+                    self.sync_shopping_list()
                 if idle_time_ms > IDLE_SYNC_MS and self.g.sync_required():
                     # If we are idle for a long while, trigger a background sync.
                     spinner = show_spinner()
@@ -185,5 +188,6 @@ class page_stock_list:
             elif self.mode == "shopping_list":
                 # This passes in a copy of the shopping list set
                 self.sync_displayed_products(list(self.shopping_list))
+        self.sync_shopping_list()
         lv.scr_act().clean()
         return self.return_code
