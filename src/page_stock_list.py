@@ -28,6 +28,8 @@ class page_stock_list:
                 spinner = show_spinner()
                 self.g.sync()
                 spinner.delete()
+
+            self.update_product_list_display()
             self.reset_entry_state()
 
     def btn_view_cb(self, obj, event):
@@ -157,10 +159,17 @@ class page_stock_list:
         self.shopping_list_changed = False
         spinner.delete()
 
+    def update_product_list_display(self):
+        if self.mode == "stocks":
+            products = list(self.g.search_stocked_product_names_by_name(self.buffer_text.get_text()))
+            self.sync_displayed_products(products)
+        elif self.mode == "shopping_list":
+            # This passes in a copy of the shopping list set
+            self.sync_displayed_products(list(self.shopping_list))
+
     def mainloop(self):
         print("Looping")
         self.keyboard.new = True
-        products = []
         self.displayed = {}
         self.running = True
         while self.running:
@@ -182,12 +191,7 @@ class page_stock_list:
                     self.g.sync()
                     self.shopping_list = set(self.g.get_shopping_list())
                     spinner.delete()
-            if self.mode == "stocks":
-                products = list(self.g.search_stocked_product_names_by_name(self.buffer_text.get_text()))
-                self.sync_displayed_products(products)
-            elif self.mode == "shopping_list":
-                # This passes in a copy of the shopping list set
-                self.sync_displayed_products(list(self.shopping_list))
+            self.update_product_list_display()
         self.sync_shopping_list()
         lv.scr_act().clean()
         return self.return_code

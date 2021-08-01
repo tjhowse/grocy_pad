@@ -5,17 +5,14 @@ from page_stock_list import page_stock_list
 
 screen = M5Screen()
 lv.scr_act().clean()
-msg = show_msg("Syncing with Grocy...", 10, 10)
-spinner = show_spinner()
 g = grocy_api(grocy_api_key, grocy_domain)
-spinner.delete()
-msg.delete()
-show_msg("Sync done")
 
 page_name = 'shopping_list'
 
 while True:
+    spinner = show_spinner()
     g.sync(force=True)
+    spinner.delete()
     print("Starting page {}".format(page_name))
     if page_name == 'shopping_list':
         page = page_shopping_list(g)
