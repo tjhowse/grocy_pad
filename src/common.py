@@ -1,5 +1,4 @@
 from m5stack_ui import M5Screen
-import time
 from i2c_kb import i2c_kb
 from secrets import grocy_api_key, grocy_domain
 from grocy_api import grocy_api

@@ -39,6 +39,9 @@ def flash_to_micropython(device, kill_screen, force, target):
     flashed = os.listdir("./flashed")
     toFlash = os.listdir("./src")
     for file in toFlash:
+        if file == "demo_simulator.py":
+            # Don't flash the mock version.
+            continue
         if file in flashed and (get_digest("./flashed/" + file) == get_digest("./src/" + file)) and not force:
             print("File " + file + " already flashed")
             continue

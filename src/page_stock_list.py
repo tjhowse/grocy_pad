@@ -28,8 +28,6 @@ class page_stock_list:
                 spinner = show_spinner()
                 self.g.sync()
                 spinner.delete()
-
-            self.update_product_list_display()
             self.reset_entry_state()
 
     def btn_view_cb(self, obj, event):
@@ -71,7 +69,7 @@ class page_stock_list:
     def reset_entry_state(self):
         self.buffer_text.set_text("")
         self.keyboard.clear_buffer()
-        self.keyboard.new = True
+        self.update_product_list_display()
         for disp in self.displayed:
             self.displayed[disp].set_style_local_bg_color(0, 0, lv.color_make(255,255,255))
 
