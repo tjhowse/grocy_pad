@@ -16,7 +16,9 @@ https://www.youtube.com/playlist?list=PLT7ckgz8vcoZQXg738lWLX3vyoRwWtYmF
 
 Use M5Burner (Closed source software! Boo! Hiss!) to write the latest version of the UIFlow firmware to your device.
 
-You may like to use the `write.py` script to help with flashing things to your device.
+Since you can't really trust software you can't build yourself, I recommend blocking the MAC address of your device in your router such that it cannot contact the internet. It's what I did.
+
+You may like to use the `write.py` script to help with flashing things to your device directly via serial. It uses `ampy` under the hood.
 
 Create a `secrets.py` and include that on your device, along with everything in the `src` directory.
 
