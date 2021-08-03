@@ -8,8 +8,6 @@ It should run on other ESP32-based hardware with suitable modification. Do yours
 
 ![Demonstration of grocy pad running on hardware](img/grocy_pad_image.png "Grocy pad demo")
 
-(The screen looks better than this in person. There's some moire effect going on here)
-
 ## Videos
 
 https://www.youtube.com/playlist?list=PLT7ckgz8vcoZQXg738lWLX3vyoRwWtYmF
