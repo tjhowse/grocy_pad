@@ -5,6 +5,8 @@ This is a Micropython + LVGL project that aims to provide an electronic shopping
 
 It should run on other ESP32-based hardware with suitable modification. Do yourself a favour and get something with some PSRAM though.
 
+On 2021-08-09 I was informed by the manufacturer that they are planning to end-of-line the FACES range. Bummer!
+
 
 ![Demonstration of grocy pad running on hardware](img/grocy_pad_image.png "Grocy pad demo")
 
